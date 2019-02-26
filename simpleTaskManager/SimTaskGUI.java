@@ -1,6 +1,6 @@
 
 package simpleTaskManager;
-import simpleTaskManager.*;
+
 
 //standard javafx imports
 import javafx.application.Application;
@@ -228,6 +228,8 @@ public class SimTaskGUI extends Application implements Serializable{
 			showAllDialog();
 		});
 		
+		cbDatesBox.setOnMousePressed(ae -> updateProgress());
+		
 		
 	}//init()
 	
@@ -249,7 +251,7 @@ public class SimTaskGUI extends Application implements Serializable{
 						ilot = myTasks.getSize();
 //						System.out.println(myDates.getSize());
 						int id = myDates.getSize();
-						System.out.println(id);
+//						System.out.println(id);
 						myDates.addItem(new TasksDate(id, LocalDate.now(), ifot, ilot));
 						saveDates();
 					}
@@ -323,7 +325,11 @@ public class SimTaskGUI extends Application implements Serializable{
 		txtfNewDgID.setText(SimTask.genID(myTasks.getSize()));
 		
 		//events on action
-		btnNewDgCancel.setOnAction(ae -> addDgStage.close());
+		btnNewDgCancel.setOnAction(ae ->{
+			cbDatesBox.getItems().clear();
+			popDateList();
+			addDgStage.close();
+		});
 		
 		btnNewDgOk.setOnAction(ae -> {
 			
@@ -336,6 +342,8 @@ public class SimTaskGUI extends Application implements Serializable{
 					myTasks.addItem(new SimTask(txtfNewDgID.getText(), txtfNewDgName.getText(), "New", null, false, txtNewDgNote.getText()));
 					saveTasks();
 					new Alert(AlertType.INFORMATION, "New Task Added").showAndWait();
+					cbDatesBox.getItems().clear();
+					popDateList();
 					addDgStage.close();
 				}else {
 					createTasksDate();
@@ -343,6 +351,8 @@ public class SimTaskGUI extends Application implements Serializable{
 					myTasks.addItem(new SimTask(txtfNewDgID.getText(), txtfNewDgName.getText(), "Unfinished",LocalTime.now(), false, txtNewDgNote.getText()));
 					saveTasks();
 					new Alert(AlertType.INFORMATION, "New Task Added").showAndWait();
+					cbDatesBox.getItems().clear();
+					popDateList();
 					addDgStage.close();
 				}
 				
@@ -353,7 +363,8 @@ public class SimTaskGUI extends Application implements Serializable{
 					myTasks.addItem(new SimTask(txtfNewDgID.getText(), txtfNewDgName.getText(), "New", null, true, txtNewDgNote.getText()));
 					saveTasks();
 					new Alert(AlertType.INFORMATION, "New Task Added").showAndWait();
-					
+					cbDatesBox.getItems().clear();
+					popDateList();
 					addDgStage.close();
 				}else {
 					createTasksDate();
@@ -361,7 +372,8 @@ public class SimTaskGUI extends Application implements Serializable{
 					myTasks.addItem(new SimTask(txtfNewDgID.getText(), txtfNewDgName.getText(), "Unfinished", LocalTime.now(), true, txtNewDgNote.getText()));
 					saveTasks();
 					new Alert(AlertType.INFORMATION, "New Task Added").showAndWait();
-					
+					cbDatesBox.getItems().clear();
+					popDateList();
 					addDgStage.close();
 				}
 				
@@ -415,6 +427,8 @@ public class SimTaskGUI extends Application implements Serializable{
 		
 		//events on action
 		btnShowDgExit.setOnAction(ae -> {
+			cbDatesBox.getItems().clear();
+			popDateList();
 			updateProgress();
 			showAllDg.close();
 		});
@@ -477,6 +491,8 @@ public class SimTaskGUI extends Application implements Serializable{
 				deleteItem();
 				new Alert(AlertType.INFORMATION, "Task Deleted").showAndWait();
 				updateProgress();
+				cbDatesBox.getItems().clear();
+				popDateList();
 				showAllDg.close();
 				saveTasks();
 			}
@@ -486,6 +502,8 @@ public class SimTaskGUI extends Application implements Serializable{
 		btnShowDgEdit.setOnAction(ae -> {
 			editTask();
 			updateProgress();
+			cbDatesBox.getItems().clear();
+			popDateList();
 			showAllDg.close();
 		});
 
@@ -712,11 +730,8 @@ public class SimTaskGUI extends Application implements Serializable{
 		//read in .dat file
 		 datFileIn();
 		 dateFileIn();
-		 updateProgress();
-	
 		 popDateList();
-
-		
+		 updateProgress();
 		 
 		 
 		//create scene
@@ -732,16 +747,38 @@ public class SimTaskGUI extends Application implements Serializable{
 		if (myTasks.getSize() > 0) {
 			int tasksNos = 0;
 			int completed = 0;
-			int start = myDates.getItem(myDates.getSize()-1).getStartIndex();
-			for (int i = start; i < myTasks.getSize(); i++) {
-				if (!(myTasks.getItem(i)).isDeleted()) {
-					tasksNos++;
-					if (myTasks.getItem(i).getState().equals("Completed")) {
-						completed++;
-					}
-				}
+			int index = dateIndex(cbDatesBox);
+			int start;
+			if(((myDates.getItem(myDates.getSize()-1).getDate() != LocalDate.now()) 
+					&& index == myDates.getSize()-1) 
+					|| (LocalDate.now().equals(myDates.getItem(index).getDate()) ))
+			{
+				start = myDates.getItem(index).getStartIndex();
 				
+				for (int i = start; i < myTasks.getSize(); i++) {
+					if (!(myTasks.getItem(i)).isDeleted()) {
+						tasksNos++;
+						if (myTasks.getItem(i).getState().equals("Completed")) {
+							completed++;
+						}
+					}
+					
+				}
+			}else {
+				start = myDates.getItem(index).getStartIndex();
+				
+				for (int i = start; i <= myDates.getItem(index).getEndIndex(); i++) {
+					if (!(myTasks.getItem(i)).isDeleted()) {
+						tasksNos++;
+						if (myTasks.getItem(i).getState().equals("Completed")) {
+							completed++;
+						}
+					}
+					
+				}
 			}
+//			start = myDates.getItem(myDates.getSize()-1).getStartIndex();
+
 			
 			double incBy = 1/(double)tasksNos;//increase by
 
@@ -766,7 +803,7 @@ public class SimTaskGUI extends Application implements Serializable{
 		
 	}//stop()
 	
-	private int taskIndex() {//return the index of selected task
+	private int taskIndex() {//return the index of selected task in lvTasks ListView
 		if (lvTasks.getSelectionModel().getSelectedIndex() >= 0) {
 			String[] firstSplit = lvTasks.getSelectionModel().getSelectedItem().split(" : ");
 			String[] splitID = firstSplit[0].split("-");
@@ -778,20 +815,29 @@ public class SimTaskGUI extends Application implements Serializable{
 		
 	}
 	
-	private int dateIndex() {
-		if (lvDates.getSelectionModel().getSelectedIndex() >= 0) {
-			String[] token = lvDates.getSelectionModel().getSelectedItem().split(" . ");
+	private int dateIndex(ListView<String> lv) {//get the ArrayList index of the currently select date in lvDates ListView
+		if (lv.getSelectionModel().getSelectedIndex() >= 0) {
+			String[] token = lv.getSelectionModel().getSelectedItem().split(" . ");
 			int index = Integer.valueOf(token[0]);
 			return index;
 		}else {
 			return -1;
 		}
-	}
+	}//dateIndex
+	
+	private int dateIndex(ComboBox<String> cb) {//get the ArrayList index of the currently select date in cbDates ComboBox
+		if (cb.getSelectionModel().getSelectedIndex() >= 0) {
+			String[] token = cb.getSelectionModel().getSelectedItem().split(" . ");
+			int index = Integer.valueOf(token[0]);
+			return index;
+		}else {
+			return -1;
+		}
+	}//dateIndex
 	
 	
-	//datFileIn load SimTask object to tasklist
+	//datFileIn load SimTask objects to myTask TaskList
 	private void datFileIn() {
-		
 		try {
 			datFile = new ObjectInputStream(new FileInputStream("save.dat"));
 			SimTask t = (SimTask) datFile.readObject();
@@ -801,11 +847,7 @@ public class SimTaskGUI extends Application implements Serializable{
 				t = (SimTask) datFile.readObject();
 				myTasks.addItem(t);
 			}//while
-			
-			datFile.close();
-			
-			
-			
+			datFile.close();	
 		}catch(IOException e) {
 			if (e instanceof EOFException) {
 				return;
@@ -816,7 +858,7 @@ public class SimTaskGUI extends Application implements Serializable{
 		}//catch
 	}//datFileIn()
 	
-	private void dateFileIn() {
+	private void dateFileIn() {//populates myDates DateList with TasksDate object from dat file
 		try {
 			dateFile = new ObjectInputStream(new FileInputStream("dates.dat"));
 			TasksDate d = (TasksDate) dateFile.readObject();
@@ -836,16 +878,18 @@ public class SimTaskGUI extends Application implements Serializable{
 		}catch(ClassNotFoundException c) {
 			c.printStackTrace();
 		}//catch
-	}
+	}//dateFileIn()
 	
+	/*
+	 * update tasks ListView with SimTasks objects from myTasks TaskList
+	 */
 	private void popList() {
 		if (myDates.getSize() > 0) {
-			int index = dateIndex();
+			int index = dateIndex(lvDates);
 			if(((myDates.getItem(myDates.getSize()-1).getDate() != LocalDate.now()) 
 					&& index == myDates.getSize()-1) 
 					|| (LocalDate.now().equals(myDates.getItem(index).getDate()) )){
 				int start = myDates.getItem(index).getStartIndex();
-				//int end = myDates.getItem(index).getEndIndex();
 				for (int i = start; i < myTasks.getSize(); i++) {
 					if (!(myTasks.getItem(i).isDeleted())) {
 						lvTasks.getItems().add(myTasks.getItem(i).getID()+" : "+myTasks.getItem(i).getName());
@@ -868,10 +912,11 @@ public class SimTaskGUI extends Application implements Serializable{
 				lvTasks.getSelectionModel().selectFirst();
 			}
 		}
-
-
-	}
+	}//popList()
 	
+	/*
+	 * get TaskDate object from myDate DateList and add to ListView lvDates and ComboBox cbDates
+	 */
 	private void popDateList() {
 	
 		for (int i = myDates.getSize()-1; i>=0 ; i--) {
@@ -890,10 +935,10 @@ public class SimTaskGUI extends Application implements Serializable{
 		lvDates.getSelectionModel().selectFirst();
 		cbDatesBox.getSelectionModel().selectFirst();
 
-	}
+	}//popDateList()
 
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) {//main class
 		
 		// launch application
 		launch();
