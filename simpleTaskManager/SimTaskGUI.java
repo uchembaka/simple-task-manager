@@ -260,21 +260,6 @@ public class SimTaskGUI extends Application implements Serializable{
 			//do nothing
 		}
 		
-//		if (myTasks.getSize() == 0) {
-//			//fot = false;
-//			ifot = 0;
-//			ilot = 0;
-//			myDates.addItem(new TasksDate(myDates.getSize(), LocalDate.now(), ifot, ilot));
-//			saveDates();
-//		}else if (!(myTasks.getItem(myTasks.getSize()-1).getDateCreated().isEqual(LocalDate.now()))) {
-//			ifot = myTasks.getSize();
-//			myDates.getItem(myDates.getSize()-1).setEndIndex(myTasks.getSize()-1);
-//			ilot = myTasks.getSize();
-//			myDates.addItem(new TasksDate(myDates.getSize(), LocalDate.now(), ifot, ilot));
-//			saveDates();
-//		}else {
-//			
-//		}
 
 	}
 	
@@ -670,17 +655,7 @@ public class SimTaskGUI extends Application implements Serializable{
 				}else {
 					new Alert(AlertType.ERROR, "Setting task state to complete from edit not allowed").showAndWait();
 					editDgStage.close();
-//					if (myTasks.getItem(index).getStartTime().equals(null) && myTasks.getItem(index).getEndTime().equals(null)) {
-//						myTasks.getItem(index).setState("Completed");
-//						myTasks.getItem(index).setStartTime(LocalTime.now());
-//						myTasks.getItem(index).setEndTime(LocalTime.now());
-//						btnShowDgEndStart.setDisable(true);
-//						myTasks.getItem(index).setNote("THIS TASK WAS SET FROM NEW TO COMPLETED IN EDIT\n"+myTasks.getItem(index).getNote());
-//					}else {
-//						myTasks.getItem(index).setState("Completed");
-//						myTasks.getItem(index).setEndTime(LocalTime.now());
-//						btnShowDgEndStart.setDisable(true);
-//					}
+
 				}				
 				//save edit
 				saveTasks();
@@ -740,18 +715,7 @@ public class SimTaskGUI extends Application implements Serializable{
 		 updateProgress();
 	
 		 popDateList();
-//		 cbDatesBox.getItems().addAll(lvDates.getItems().toString());
-		 
-		 
-/*
- * 	testing	
- */
-//		myDates.deleteItem(1);
-//		myTasks.deleteItem(11);
-//		System.out.println(myDates.getSize());
-		
-//		System.out.println(myDates.getItem(0).getIndex());
-//		System.out.println(myDates.getItem(1).getIndex());
+
 		
 		 
 		 
@@ -891,17 +855,7 @@ public class SimTaskGUI extends Application implements Serializable{
 				lvTasks.getSelectionModel().selectFirst();
 			
 			}
-//			else if (LocalDate.now().equals(myDates.getItem(index).getDate()) ) {
-//				int start = myDates.getItem(index).getStartIndex();
-//				//int end = myDates.getItem(index).getEndIndex();
-//				for (int i = start; i < myTasks.getSize(); i++) {
-//					if (!(myTasks.getItem(i).isDeleted())) {
-//						lvTasks.getItems().add(myTasks.getItem(i).getID()+" : "+myTasks.getItem(i).getName());
-//					}
-//					
-//				}
-//				lvTasks.getSelectionModel().selectFirst();
-//			}
+
 			else {
 				int start = myDates.getItem(index).getStartIndex();
 				int end = myDates.getItem(index).getEndIndex();
